@@ -6,17 +6,17 @@ import time
 import requests
 import json
 
-# Configuration parameters
-THRESHOLD = 500  # Adjust for microphone sensitivity
-PAUSE_DURATION = 2  # Seconds of silence to stop recording
+
+THRESHOLD = 500 
+PAUSE_DURATION = 2  
 SAMPLE_RATE = 16000
 CHUNK = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 OUTPUT_WAVE_FILENAME = "recorded_audio.wav"
-OLLAMA_URL = "http://localhost:11434/api/generate"  # Replace with your Ollama server endpoint
+OLLAMA_URL = "http://localhost:11434/api/generate"  
 
-# Function to record audio based on user speech
+
 def record_audio():
     audio = pyaudio.PyAudio()
     stream = audio.open(format=FORMAT, channels=CHANNELS,
@@ -30,14 +30,14 @@ def record_audio():
         data = stream.read(CHUNK)
         frames.append(data)
 
-        # Detect silence
+        
         audio_data = np.frombuffer(data, dtype=np.int16)
         if np.max(audio_data) < THRESHOLD:
             silent_chunks += 1
         else:
             silent_chunks = 0
 
-        # Stop recording after pause duration
+        
         if silent_chunks > (SAMPLE_RATE / CHUNK * PAUSE_DURATION):
             print("Finished recording.")
             break
@@ -46,7 +46,7 @@ def record_audio():
     stream.close()
     audio.terminate()
 
-    # Save recorded audio to a file
+    
     with wave.open(OUTPUT_WAVE_FILENAME, 'wb') as wf:
         wf.setnchannels(CHANNELS)
         wf.setsampwidth(audio.get_sample_size(FORMAT))
@@ -55,42 +55,42 @@ def record_audio():
 
     return OUTPUT_WAVE_FILENAME
 
-# Function to transcribe audio using Whisper
+
 def transcribe_audio(audio_file):
     print("Transcribing audio...")
-    model = whisper.load_model("base")  # Use 'base', 'small', 'medium', or 'large' based on your resources
+    model = whisper.load_model("base") 
     result = model.transcribe(audio_file)
     return result['text']
 
-# Function to query the Ollama model
+
 def query_ollama(prompt):
     print("Querying Ollama model...")
     headers = {'Content-Type': 'application/json'}
     data = {
         "prompt": prompt,
-        "model": "qwen2.5-coder:latest"  # Replace with the correct model name
+        "model": "qwen2.5-coder:latest"  
     }
     
-    # Send the request
+    
     response = requests.post(OLLAMA_URL, json=data, headers=headers, stream=True)
     
-    # Initialize an empty string to collect the full response
+    
     complete_response = ""
     
     if response.status_code == 200:
         try:
-            # Read each line of the streaming response
-            for line in response.iter_lines():
-                if line:  # Ignore empty lines
-                    line_data = json.loads(line.decode('utf-8'))  # Parse JSON
-                    complete_response += line_data.get("response", "")  # Append response text
             
-            return complete_response.strip()  # Return the full response
+            for line in response.iter_lines():
+                if line:  
+                    line_data = json.loads(line.decode('utf-8'))  
+                    complete_response += line_data.get("response", "")  
+            
+            return complete_response.strip()  
         except Exception as e:
             return f"Error processing response: {e}\nRaw response: {response.text}"
     else:
         return f"Error: {response.status_code} - {response.text}"
-# Main program
+
 def main():
     audio_file = record_audio()
     transcription = transcribe_audio(audio_file)
