@@ -1,5 +1,0 @@
-whisper
-pyaudio
-wave
-numpy
-requests
