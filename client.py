@@ -31,7 +31,7 @@ def record_audio():
                         frames_per_buffer=CHUNK)
 
     print("\nListening... Speak now.")
-    time.sleep(0.75) 
+    time.sleep(5.00) 
 
     frames = []
     silent_chunks = 0
