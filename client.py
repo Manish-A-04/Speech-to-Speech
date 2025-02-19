@@ -21,8 +21,8 @@ OUTPUT_WAVE_FILENAME = "recorded_audio.wav"
 OLLAMA_URL = "http://localhost:11434/api/generate"
 
 
-KOKORO_MODEL = build_model("tts_model/kokoro-v0_19.pth", DEVICE)  
-VOICEPACK = torch.load("voices/af.pt", weights_only=True).to(DEVICE) 
+KOKORO_MODEL = build_model("tts_model/kokoro-v0_19.pth","cuda")  
+VOICEPACK = torch.load("voices/af.pt", weights_only=True , map_location="cuda")
 
 def record_audio():
     audio = pyaudio.PyAudio()
@@ -93,10 +93,12 @@ def speak_paragraphs(paragraph_accumulator, model, voicepack):
         try:
             cleaned_text = clean_text(paragraph.strip())
             audio_data, _ = generate_full(model, cleaned_text, voicepack, lang='a', speed=1)
+            print(f"Audio data : \n{audio_data}")
             audio_data = (audio_data / np.max(np.abs(audio_data)) * 32767).astype(np.int16)
             audio_stream = pyaudio.PyAudio().open(format=pyaudio.paInt16, channels=1,
                                                   rate=24000, output=True)
             audio_stream.write(audio_data.tobytes())
+            audio_stream.stop_stream()
             audio_stream.close()
         except Exception as e:
             print(f"\nError in TTS: {e}")
