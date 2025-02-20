@@ -73,7 +73,7 @@ def query_ollama_streaming(prompt):
     headers = {'Content-Type': 'application/json'}
     data = {
         "prompt": prompt,
-        "model": "llama3.2:1b-instruct-q2_K"
+        "model": "llama3:latest"
     }
     response = requests.post(OLLAMA_URL, json=data, headers=headers, stream=True)
 
