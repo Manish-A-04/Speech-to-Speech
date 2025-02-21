@@ -64,7 +64,7 @@ def record_audio():
 
 def transcribe_audio(audio_file):
     print("Transcribing audio...")
-    model = whisper.load_model("base")
+    model = whisper.load_model("small.en")
     result = model.transcribe(audio_file)
     return result['text']
 
@@ -73,7 +73,7 @@ def query_ollama_streaming(prompt):
     headers = {'Content-Type': 'application/json'}
     data = {
         "prompt": prompt,
-        "model": "llama3.2:1b-instruct-q2_K"
+        "model": "deepseek-r1:8b"
     }
     response = requests.post(OLLAMA_URL, json=data, headers=headers, stream=True)
 
